@@ -47,8 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AndroidSetup.cs" />
+    <Compile Include="WindowsSetup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
