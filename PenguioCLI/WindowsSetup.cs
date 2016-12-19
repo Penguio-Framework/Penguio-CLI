@@ -227,7 +227,7 @@ namespace PenguioCLI
                 {
                     new ConsoleLogger(LoggerVerbosity.Normal)
                 }
-            }, new BuildRequestData(new ProjectInstance(Path.Combine(winDeskopPlatform, "Client.WindowsGame.csproj")), new string[] { "Rebuild" }));
+            }, new BuildRequestData(new ProjectInstance(Path.Combine(winDeskopPlatform, "Client.WindowsGame.csproj")), new string[] { "Build" }));
             switch (j.OverallResult)
             {
                 case BuildResultCode.Success:
@@ -244,7 +244,7 @@ namespace PenguioCLI
 
         public static void RunWindowsPlatform(BuildResult build)
         {
-            var exe = build.ResultsByTarget["Rebuild"].Items.First().ItemSpec;
+            var exe = build.ResultsByTarget["Build"].Items.First().ItemSpec;
             Directory.SetCurrentDirectory(exe.Replace("Client.WindowsGame.exe", ""));
             System.Diagnostics.Process.Start(exe);
         }

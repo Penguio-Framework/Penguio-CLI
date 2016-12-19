@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using LibGit2Sharp;
 using Microsoft.Build.Execution;
 using Newtonsoft.Json;
 
@@ -11,12 +12,12 @@ namespace PenguioCLI
 
         static void Main(string[] commands)
         {
-//            commands = new[] { "platform", "rm", "web"};
-//            commands = new[] { "platform", "add", "web", @"C:\code\penguio\Penguio-Framework" };
-//            commands = new[] { "platform", "rm", "web" };
-//                        commands = new[] { "platform", "run", "android" };
+            //            commands = new[] { "platform", "rm", "web"};
+            commands = new[] { "platform", "add", "web" };
+            //            commands = new[] { "platform", "rm", "web" };
+            //                        commands = new[] { "platform", "run", "android" };
             var directory = Directory.GetCurrentDirectory();
-//            directory = @"C:\code\penguio\PenguinShuffle";
+            directory = @"C:\code\penguio\PenguinShuffle";
 
             project = JsonConvert.DeserializeObject<ProjectConfig>(File.ReadAllText(Path.Combine(directory, "config.json")));
 
@@ -35,7 +36,23 @@ namespace PenguioCLI
                     {
                         case "add":
                         case "a":
-                            var path = commands[3];
+                            string path;
+                            if (commands.Length == 3)
+                            {
+                                var workdirPath = Path.GetTempPath();
+                                var framework = Path.Combine(workdirPath, "penguio-framework");
+                                if (!Directory.Exists(framework))
+                                {
+                                    Directory.CreateDirectory(framework);
+                                    Repository.Clone("https://github.com/Penguio-Framework/Penguio-Framework.git", framework);
+                                }
+                                path = framework;
+                            }
+                            else
+                            {
+                                path = commands[3];
+
+                            }
                             switch (commands[2].ToLower())
                             {
                                 case "windowsdesktop":
@@ -83,7 +100,7 @@ namespace PenguioCLI
                                     break;
                                 case "web":
                                 case "w":
-                                    WebSetup.BuildWebPlatform(directory,project);
+                                    WebSetup.BuildWebPlatform(directory, project);
                                     break;
                                 case "android":
                                 case "a":
