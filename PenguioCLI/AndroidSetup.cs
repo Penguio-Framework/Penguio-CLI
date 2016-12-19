@@ -11,7 +11,7 @@ namespace PenguioCLI
 {
     public class AndroidSetup
     {
-        public static void AddAndroidPlatform(string directory, string path,string projectName)
+        public static void AddAndroidPlatform(string directory, string path, ProjectConfig project)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -52,10 +52,10 @@ namespace PenguioCLI
             engineFiles.Add(Path.Combine("Game", "Game.cs"));
 
             var contents = "using System;using Engine.Interfaces;namespace {{{projectName}}}{public class Game : IGame{public void InitScreens(IRenderer renderer, IScreenManager screenManager){throw new NotImplementedException();}public void LoadAssets(IRenderer renderer){throw new NotImplementedException();}public void BeforeTick(){throw new NotImplementedException();}public void AfterTick(){throw new NotImplementedException();}public void BeforeDraw(){throw new NotImplementedException();}public void AfterDraw(){throw new NotImplementedException();}public IClient Client { get; set; }public AssetManager AssetManager { get; set; }}}";
-            File.WriteAllText(Path.Combine(androidPlatform, "Game", "Game.cs"), contents.Replace("{{{projectName}}}", projectName));
-            File.WriteAllText(Path.Combine(androidPlatform, "GameClient.cs"), File.ReadAllText(Path.Combine(androidPlatform, "GameClient.cs")).Replace("{{{projectName}}}", "new " + projectName + ".Game()"));
+            File.WriteAllText(Path.Combine(androidPlatform, "Game", "Game.cs"), contents.Replace("{{{projectName}}}", project.ProjectName));
+            File.WriteAllText(Path.Combine(androidPlatform, "GameClient.cs"), File.ReadAllText(Path.Combine(androidPlatform, "GameClient.cs")).Replace("{{{projectName}}}", "new " + project.ProjectName + ".Game()"));
 
-            File.WriteAllText(Path.Combine(androidPlatform, "Properties/AndroidManifest.xml"), File.ReadAllText(Path.Combine(androidPlatform, "Properties/AndroidManifest.xml")).Replace("{{{projectName}}}", projectName));
+            File.WriteAllText(Path.Combine(androidPlatform, "Properties/AndroidManifest.xml"), File.ReadAllText(Path.Combine(androidPlatform, "Properties/AndroidManifest.xml")).Replace("{{{projectName}}}", project.ProjectName));
 
             engineFiles.Add("Activity.cs");
             engineFiles.Add(@"Resources\Resource.Designer.cs");
@@ -107,7 +107,12 @@ namespace PenguioCLI
             var androidPlatform = Path.Combine(directory, "platforms", "Android");
             var gameSrc = Path.Combine(directory, "src");
 
-            Directory.Delete(platformAssetsFolder,true);
+            if (Directory.Exists(platformAssetsFolder))
+                Directory.Delete(platformAssetsFolder, true);
+
+            if (Directory.Exists(platformGameFolder))
+                Directory.Delete(platformGameFolder, true);
+            
             //copy assets
             var names = FileUtils.DirectoryCopy(platformContent, assetsFolder, platformAssetsFolder, true);
 
@@ -180,10 +185,10 @@ namespace PenguioCLI
             return j;
         }
 
-        public static void RunAndroidPlatform(string directory, string projectName,BuildResult build)
+        public static void RunAndroidPlatform(string directory, ProjectConfig project,BuildResult build)
         {
 //            var apk = Path.Combine(directory, @"platforms\Android\bin\Android\AnyCPU\Debug\com."+projectName+".game-Signed.apk");
-            System.Diagnostics.Process.Start("adb", "shell am start -n com." + projectName + ".game/md5fe4548818b426bee4361f0bedb3504dc.MainActivity").WaitForExit();
+            System.Diagnostics.Process.Start("adb", "shell am start -n com." + project.ProjectName + ".game/md5fe4548818b426bee4361f0bedb3504dc.MainActivity").WaitForExit();
         }
     }
 }

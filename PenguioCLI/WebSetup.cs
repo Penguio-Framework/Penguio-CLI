@@ -11,7 +11,7 @@ namespace PenguioCLI
 {
     public class WebSetup
     {
-        public static void AddWebPlatform(string directory, string path,string projectName)
+        public static void AddWebPlatform(string directory, string path, ProjectConfig project)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -26,42 +26,31 @@ namespace PenguioCLI
             }
             var webPlatform = Path.Combine(directory, "platforms", "Web");
             Directory.CreateDirectory(webPlatform);
+            Directory.CreateDirectory(webPlatform + "/Bridge");
             var clientPath = Path.Combine(path, "Client.Web");
 
-            File.Copy(Path.Combine(clientPath, "Activity.cs"), Path.Combine(webPlatform, "Activity.cs"));
-            File.Copy(Path.Combine(clientPath, "GameClient.cs"), Path.Combine(webPlatform, "GameClient.cs"));
+            File.Copy(Path.Combine(clientPath, "Program.cs"), Path.Combine(webPlatform, "Program.cs"));
+            File.Copy(Path.Combine(clientPath, "Bridge/bridge.json"), Path.Combine(webPlatform, "Bridge/bridge.json"));
             File.Copy(Path.Combine(clientPath, "WebUserPreferences.cs"), Path.Combine(webPlatform, "WebUserPreferences.cs"));
-            
+
             File.Copy(Path.Combine(clientPath, "Client.WebGame.csproj"), Path.Combine(webPlatform, "Client.WebGame.csproj"));
             File.Copy(Path.Combine(clientPath, "Client.WebGame.sln"), Path.Combine(webPlatform, "Client.WebGame.sln"));
-            Directory.CreateDirectory(Path.Combine(webPlatform, "Properties/"));
-            Directory.CreateDirectory(Path.Combine(webPlatform, "Assets/"));
-            Directory.CreateDirectory(Path.Combine(webPlatform, "Content/"));
-            Directory.CreateDirectory(Path.Combine(webPlatform, "Resources/"));
-            FileUtils.DirectoryCopy("none", Path.Combine(clientPath, "Resources"), Path.Combine(webPlatform, "Resources"), true);
-            File.Copy(Path.Combine(clientPath, "Properties/AssemblyInfo.cs"), Path.Combine(webPlatform, "Properties/AssemblyInfo.cs"));
-            File.Copy(Path.Combine(clientPath, "Properties/WebManifest.xml"), Path.Combine(webPlatform, "Properties/WebManifest.xml"));
-            File.Copy(Path.Combine(clientPath, "Content/Content.mgcb"), Path.Combine(webPlatform, "Content/Content.mgcb"));
 
-
-            Directory.CreateDirectory(Path.Combine(webPlatform, "Engine"));
-            Directory.CreateDirectory(Path.Combine(webPlatform, "Engine.Xna"));
             Directory.CreateDirectory(Path.Combine(webPlatform, "Game"));
             var engineFiles = FileUtils.DirectoryCopy(Path.Combine(webPlatform), Path.Combine(path, "Engine"), Path.Combine(webPlatform, "Engine"), true, "*.cs");
-            engineFiles.AddRange(FileUtils.DirectoryCopy(Path.Combine(webPlatform), Path.Combine(path, "Engine.Xna"), Path.Combine(webPlatform, "Engine.Xna"), true, "*.cs"));
-            engineFiles.Add(Path.Combine("Game", "Game.cs"));
+            engineFiles.AddRange(FileUtils.DirectoryCopy(Path.Combine(webPlatform), Path.Combine(path, "Engine.Web"), Path.Combine(webPlatform, "Engine.Web"), true, "*.cs"));
+
+            FileUtils.DirectoryCopy(Path.Combine(clientPath), Path.Combine(clientPath, "dlls"), Path.Combine(webPlatform, "dlls"), true, "*.dll");
+            FileUtils.DirectoryCopy(Path.Combine(clientPath), Path.Combine(clientPath, "packages"), Path.Combine(webPlatform, "packages"), true);
+
+            engineFiles.Add(Path.Combine("Game", "Program.cs"));
 
             var contents = "using System;using Engine.Interfaces;namespace {{{projectName}}}{public class Game : IGame{public void InitScreens(IRenderer renderer, IScreenManager screenManager){throw new NotImplementedException();}public void LoadAssets(IRenderer renderer){throw new NotImplementedException();}public void BeforeTick(){throw new NotImplementedException();}public void AfterTick(){throw new NotImplementedException();}public void BeforeDraw(){throw new NotImplementedException();}public void AfterDraw(){throw new NotImplementedException();}public IClient Client { get; set; }public AssetManager AssetManager { get; set; }}}";
-            File.WriteAllText(Path.Combine(webPlatform, "Game", "Game.cs"), contents.Replace("{{{projectName}}}", projectName));
-            File.WriteAllText(Path.Combine(webPlatform, "GameClient.cs"), File.ReadAllText(Path.Combine(webPlatform, "GameClient.cs")).Replace("{{{projectName}}}", "new " + projectName + ".Game()"));
+            File.WriteAllText(Path.Combine(webPlatform, "Game", "Program.cs"), contents.Replace("{{{projectName}}}", project.ProjectName));
+            File.WriteAllText(Path.Combine(webPlatform, "Program.cs"), File.ReadAllText(Path.Combine(webPlatform, "Program.cs")).Replace("{{{projectName}}}", "new " + project.ProjectName + ".Game()"));
 
-            File.WriteAllText(Path.Combine(webPlatform, "Properties/WebManifest.xml"), File.ReadAllText(Path.Combine(webPlatform, "Properties/WebManifest.xml")).Replace("{{{projectName}}}", projectName));
-
-            engineFiles.Add("Activity.cs");
-            engineFiles.Add(@"Resources\Resource.Designer.cs");
-            engineFiles.Add("GameClient.cs");
             engineFiles.Add("WebUserPreferences.cs");
-            engineFiles.Add(@"Properties\AssemblyInfo.cs");
+            engineFiles.Add(@"Program.cs");
 
             Engine eng = new Engine();
             Project proj = new Project(eng);
@@ -86,7 +75,7 @@ namespace PenguioCLI
             proj.Save(Path.Combine(webPlatform, "Client.WebGame.csproj"));
         }
 
-        public static BuildResult BuildWebPlatform(string directory)
+        public static BuildResult BuildWebPlatform(string directory, ProjectConfig project)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -100,41 +89,23 @@ namespace PenguioCLI
             }
             var platformFolder = Path.Combine(directory, "platforms", "Web");
             var assetsFolder = Path.Combine(directory, "assets", "images");
-            var platformAssetsFolder = Path.Combine(platformFolder, "Content", "images");
             var platformGameFolder = Path.Combine(platformFolder, "Game");
 
-            var platformContent = Path.Combine(platformFolder, "Content");
+            var platformOutput = Path.Combine(platformFolder, "bin", "output");
+            var platformAssets = Path.Combine(platformOutput, "images");
             var webPlatform = Path.Combine(directory, "platforms", "Web");
             var gameSrc = Path.Combine(directory, "src");
 
-            Directory.Delete(platformAssetsFolder,true);
-            //copy assets
-            var names = FileUtils.DirectoryCopy(platformContent, assetsFolder, platformAssetsFolder, true);
+            if (Directory.Exists(platformOutput))
+                Directory.Delete(platformOutput, true);
 
-            var contentFile = new List<string>();
-            contentFile.Add("/platform:Web");
-            contentFile.Add("/profile:Reach");
-            contentFile.Add("/compress:False");
-            contentFile.Add("/importer:TextureImporter");
-            contentFile.Add("/processor:TextureProcessor");
-            contentFile.Add("/processorParam:ColorKeyColor=255,0,255,255");
-            contentFile.Add("/processorParam:ColorKeyEnabled=True");
-            contentFile.Add("/processorParam:GenerateMipmaps=False");
-            contentFile.Add("/processorParam:PremultiplyAlpha=True");
-            contentFile.Add("/processorParam:ResizeToPowerOfTwo=False");
-            contentFile.Add("/processorParam:MakeSquare=False");
-            contentFile.Add("/processorParam:TextureFormat=Color");
-            foreach (var name in names)
-            {
-                contentFile.Add("/build:" + name);
-            }
-            File.WriteAllLines(Path.Combine(platformContent, "Content.mgcb"), contentFile);
+            if (Directory.Exists(platformGameFolder))
+                Directory.Delete(platformGameFolder, true);
+            FileUtils.DirectoryCopy(platformAssets, assetsFolder, platformAssets, true);
+
 
 
             var gameFiles = FileUtils.DirectoryCopy(platformGameFolder, gameSrc, platformGameFolder, true, "*.cs");
-
-
-
 
             Engine eng = new Engine();
             Project proj = new Project(eng);
@@ -164,7 +135,7 @@ namespace PenguioCLI
             var pc = new ProjectCollection();
             pc.SetGlobalProperty("Configuration", "Debug");
             pc.SetGlobalProperty("Platform", "Any CPU");
-            var buildRequestData = new BuildRequestData(new ProjectInstance(Path.Combine(webPlatform, "Client.WebGame.csproj")), new [] { "Rebuild"});
+            var buildRequestData = new BuildRequestData(new ProjectInstance(Path.Combine(webPlatform, "Client.WebGame.csproj")), new[] { "Rebuild" });
             var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc), buildRequestData);
             switch (j.OverallResult)
             {
@@ -177,13 +148,32 @@ namespace PenguioCLI
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            var jsFiles = "";
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/bridge.js\" ></script>";
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.interfaces.js\" ></script>";
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.js\" ></script>";
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.web.js\" ></script>";
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.animation.js\" ></script>";
+
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/client.js\" ></script>";
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/client.web.js\" ></script>";
+
+
+            foreach (var file in Directory.GetFiles(Path.Combine(platformOutput, "js"), project.ProjectName + "*.js").Where(a=>!a.Contains(".min.")))
+            {
+                jsFiles += $"<script type=\"text/javascript\" src=\"{file.Replace(platformOutput + "\\", "")}\" ></script>";
+            }
+
+            File.WriteAllText(Path.Combine(platformOutput, "index.html"), "<!DOCTYPE html><html><head><style>body {padding: 50px;font: 14px \"Lucida Grande\", Helvetica, Arial, sans-serif;}* {margin: 0;padding: 0;}html, body {width: 100%;height: 100%;}canvas {display: block;margin: 0;position: absolute;top: 0;left: 0;z-index: 0;}.clickManager {display: block;margin: 0;position: absolute;top: 0;left: 0;z-index: 0;}</style></head><body>{{{js}}}</body></html>".Replace("{{{js}}}", jsFiles));
+
+
+
             return j;
         }
 
-        public static void RunWebPlatform(string directory, string projectName,BuildResult build)
+        public static void RunWebPlatform(string directory, ProjectConfig project, BuildResult build)
         {
-//            var apk = Path.Combine(directory, @"platforms\Web\bin\Web\AnyCPU\Debug\com."+projectName+".game-Signed.apk");
-            System.Diagnostics.Process.Start("adb", "shell am start -n com." + projectName + ".game/md5fe4548818b426bee4361f0bedb3504dc.MainActivity").WaitForExit();
         }
     }
 }

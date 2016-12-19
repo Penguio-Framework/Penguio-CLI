@@ -11,7 +11,7 @@ namespace PenguioCLI
 {
     public class WindowsSetup
     {
-        public static void AddWindowsPlatform(string directory, string path,string projectName)
+        public static void AddWindowsPlatform(string directory, string path, ProjectConfig project)
         {
 
 
@@ -49,8 +49,8 @@ namespace PenguioCLI
             engineFiles.Add(Path.Combine("Game", "Game.cs"));
 
             var contents = "using System;using Engine.Interfaces;namespace {{{projectName}}}{public class Game : IGame{public void InitScreens(IRenderer renderer, IScreenManager screenManager){throw new NotImplementedException();}public void LoadAssets(IRenderer renderer){throw new NotImplementedException();}public void BeforeTick(){throw new NotImplementedException();}public void AfterTick(){throw new NotImplementedException();}public void BeforeDraw(){throw new NotImplementedException();}public void AfterDraw(){throw new NotImplementedException();}public IClient Client { get; set; }public AssetManager AssetManager { get; set; }}}";
-            File.WriteAllText(Path.Combine(winDeskopPlatform, "Game", "Game.cs"), contents.Replace("{{{projectName}}}", projectName));
-            File.WriteAllText(Path.Combine(winDeskopPlatform, "GameClient.cs"), File.ReadAllText(Path.Combine(winDeskopPlatform, "GameClient.cs")).Replace("{{{projectName}}}", "new " + projectName + ".Game()"));
+            File.WriteAllText(Path.Combine(winDeskopPlatform, "Game", "Game.cs"), contents.Replace("{{{projectName}}}", project.ProjectName));
+            File.WriteAllText(Path.Combine(winDeskopPlatform, "GameClient.cs"), File.ReadAllText(Path.Combine(winDeskopPlatform, "GameClient.cs")).Replace("{{{projectName}}}", "new " + project.ProjectName + ".Game()"));
 
             engineFiles.Add("GameClient.cs");
             engineFiles.Add("Program.cs");
@@ -100,8 +100,11 @@ namespace PenguioCLI
             var platformContent = Path.Combine(platformFolder, "Content");
             var winDeskopPlatform = Path.Combine(directory, "platforms", "WindowsDesktop");
             var gameSrc = Path.Combine(directory, "src");
+            if (Directory.Exists(platformAssetsFolder))
+                Directory.Delete(platformAssetsFolder, true);
 
-            Directory.Delete(platformAssetsFolder,true);
+            if (Directory.Exists(platformGameFolder))
+                Directory.Delete(platformGameFolder, true);
             //copy assets
             var names = FileUtils.DirectoryCopy(platformContent, assetsFolder, platformAssetsFolder, true);
 

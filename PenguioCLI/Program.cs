@@ -1,21 +1,26 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Build.Execution;
+using Newtonsoft.Json;
 
 namespace PenguioCLI
 {
     class Program
     {
-        private static string projectName;
+        private static ProjectConfig project;
 
         static void Main(string[] commands)
         {
-            projectName = "DemolitionRobots";
-
-            //                        commands = new[] { "platform", "add", "a", @"C:\code\Multi\MonoSpanEngine" };
+//            commands = new[] { "platform", "rm", "web"};
+//            commands = new[] { "platform", "add", "web", @"C:\code\penguio\Penguio-Framework" };
+//            commands = new[] { "platform", "run", "web" };
             //            commands = new[] { "platform", "run", "android" };
             var directory = Directory.GetCurrentDirectory();
-            //            directory = @"C:\code\Multi\NewDemolitionRobots";
+            directory = @"C:\code\penguio\PenguinShuffle";
+
+            project = JsonConvert.DeserializeObject<ProjectConfig>(File.ReadAllText(Path.Combine(directory, "config.json")));
+
+
             if (commands.Length == 0 || commands[0].ToLower() == " / h")
             {
                 Console.WriteLine("help");
@@ -35,15 +40,15 @@ namespace PenguioCLI
                             {
                                 case "windowsdesktop":
                                 case "wd":
-                                    WindowsSetup.AddWindowsPlatform(directory, path, projectName);
+                                    WindowsSetup.AddWindowsPlatform(directory, path, project);
                                     break;
                                 case "web":
                                 case "w":
-                                    WebSetup.AddWebPlatform(directory, path, projectName);
+                                    WebSetup.AddWebPlatform(directory, path, project);
                                     break;
                                 case "android":
                                 case "a":
-                                    AndroidSetup.AddAndroidPlatform(directory, path, projectName);
+                                    AndroidSetup.AddAndroidPlatform(directory, path, project);
                                     break;
                             }
 
@@ -78,7 +83,7 @@ namespace PenguioCLI
                                     break;
                                 case "web":
                                 case "w":
-                                    WebSetup.BuildWebPlatform(directory);
+                                    WebSetup.BuildWebPlatform(directory,project);
                                     break;
                                 case "android":
                                 case "a":
@@ -101,13 +106,13 @@ namespace PenguioCLI
 
                                 case "web":
                                 case "w":
-                                    build = WebSetup.BuildWebPlatform(directory);
-                                    WebSetup.RunWebPlatform(directory, projectName, build);
+                                    build = WebSetup.BuildWebPlatform(directory, project);
+                                    WebSetup.RunWebPlatform(directory, project, build);
                                     break;
                                 case "android":
                                 case "a":
                                     build = AndroidSetup.BuildAndroidPlatform(directory);
-                                    AndroidSetup.RunAndroidPlatform(directory, projectName, build);
+                                    AndroidSetup.RunAndroidPlatform(directory, project, build);
                                     break;
                             }
                             break;
@@ -115,5 +120,10 @@ namespace PenguioCLI
                     break;
             }
         }
+    }
+
+    public class ProjectConfig
+    {
+        public string ProjectName { get; set; }
     }
 }
