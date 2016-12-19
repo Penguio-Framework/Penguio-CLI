@@ -202,16 +202,12 @@ namespace PenguioCLI
                     {
                         projItemGroup.AddNewItem("Compile", "Game\\" + engineFile);
                     }
-                    break;
                 }
-                if (projItemGroup.ToArray().Any(a => a.Name == "Content"))
+                if (projItemGroup.ToArray().Any(a => a.Name == "AndroidAsset"))
                 {
                     foreach (var buildItem in projItemGroup.ToArray())
                     {
-                        if (buildItem.Include.IndexOf("Content\\") == 0)
-                        {
-                            projItemGroup.RemoveItem(buildItem);
-                        }
+                    
                         if (buildItem.Include.IndexOf("Assets\\") == 0)
                         {
                             projItemGroup.RemoveItem(buildItem);
@@ -220,8 +216,7 @@ namespace PenguioCLI
                     }
                     foreach (var engineFile in xmlFontFiles)
                     {
-                        var fontContent = projItemGroup.AddNewItem("Content", "Assets\\" + engineFile);
-                        fontContent.SetMetadata("CopyToOutputDirectory", "Always");
+                        var fontContent = projItemGroup.AddNewItem("AndroidAsset", "Assets\\" + engineFile); 
                     }
                 }
             }
