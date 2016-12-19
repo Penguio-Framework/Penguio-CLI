@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace MonoSpan
+namespace PenguioCLI
 {
     public static class FileUtils
     {

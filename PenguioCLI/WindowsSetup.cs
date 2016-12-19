@@ -7,7 +7,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Project = Microsoft.Build.BuildEngine.Project;
 
-namespace MonoSpan
+namespace PenguioCLI
 {
     public class WindowsSetup
     {
@@ -101,6 +101,7 @@ namespace MonoSpan
             var winDeskopPlatform = Path.Combine(directory, "platforms", "WindowsDesktop");
             var gameSrc = Path.Combine(directory, "src");
 
+            Directory.Delete(platformAssetsFolder,true);
             //copy assets
             var names = FileUtils.DirectoryCopy(platformContent, assetsFolder, platformAssetsFolder, true);
 

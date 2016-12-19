@@ -7,8 +7,8 @@
     <ProjectGuid>{FF76B639-5969-4FEE-9DA8-2835A2422E41}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MonoSpan</RootNamespace>
-    <AssemblyName>MonoSpan</AssemblyName>
+    <RootNamespace>PenguioCLI</RootNamespace>
+    <AssemblyName>PenguioCLI</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WebSetup.cs" />
     <Compile Include="FileUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,15 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Build.BuildEngine;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Project = Microsoft.Build.BuildEngine.Project;
 
-namespace MonoSpan
+namespace PenguioCLI
 {
     class Program
     {
@@ -44,6 +37,10 @@ namespace MonoSpan
                                 case "wd":
                                     WindowsSetup.AddWindowsPlatform(directory, path, projectName);
                                     break;
+                                case "web":
+                                case "w":
+                                    WebSetup.AddWebPlatform(directory, path, projectName);
+                                    break;
                                 case "android":
                                 case "a":
                                     AndroidSetup.AddAndroidPlatform(directory, path, projectName);
@@ -58,6 +55,10 @@ namespace MonoSpan
                                 case "windowsdesktop":
                                 case "wd":
                                     Directory.Delete(Path.Combine(directory, "platforms", "WindowsDesktop"), true);
+                                    break;
+                                case "web":
+                                case "w":
+                                    Directory.Delete(Path.Combine(directory, "platforms", "Web"), true);
                                     break;
                                 case "android":
                                 case "a":
@@ -74,6 +75,10 @@ namespace MonoSpan
                                 case "windowsdesktop":
                                 case "wd":
                                     WindowsSetup.BuildWindowsPlatform(directory);
+                                    break;
+                                case "web":
+                                case "w":
+                                    WebSetup.BuildWebPlatform(directory);
                                     break;
                                 case "android":
                                 case "a":
@@ -92,6 +97,12 @@ namespace MonoSpan
                                 case "wd":
                                     build = WindowsSetup.BuildWindowsPlatform(directory);
                                     WindowsSetup.RunWindowsPlatform(build);
+                                    break;
+
+                                case "web":
+                                case "w":
+                                    build = WebSetup.BuildWebPlatform(directory);
+                                    WebSetup.RunWebPlatform(directory, projectName, build);
                                     break;
                                 case "android":
                                 case "a":
