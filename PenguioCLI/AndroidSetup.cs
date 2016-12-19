@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Project = Microsoft.Build.BuildEngine.Project;
 
 namespace PenguioCLI
@@ -31,7 +32,7 @@ namespace PenguioCLI
             File.Copy(Path.Combine(clientPath, "Activity.cs"), Path.Combine(androidPlatform, "Activity.cs"));
             File.Copy(Path.Combine(clientPath, "GameClient.cs"), Path.Combine(androidPlatform, "GameClient.cs"));
             File.Copy(Path.Combine(clientPath, "AndroidUserPreferences.cs"), Path.Combine(androidPlatform, "AndroidUserPreferences.cs"));
-            
+
             File.Copy(Path.Combine(clientPath, "Client.AndroidGame.csproj"), Path.Combine(androidPlatform, "Client.AndroidGame.csproj"));
             File.Copy(Path.Combine(clientPath, "Client.AndroidGame.sln"), Path.Combine(androidPlatform, "Client.AndroidGame.sln"));
             Directory.CreateDirectory(Path.Combine(androidPlatform, "Properties/"));
@@ -99,8 +100,15 @@ namespace PenguioCLI
                 throw new Exception("Android platform does not exist");
             }
             var platformFolder = Path.Combine(directory, "platforms", "Android");
-            var assetsFolder = Path.Combine(directory, "assets", "images");
+            var imagesFolder = Path.Combine(directory, "assets", "images");
+            var fontsFolder = Path.Combine(directory, "assets", "fonts");
+            var songsFolder = Path.Combine(directory, "assets", "songs");
+            var soundsFolder = Path.Combine(directory, "assets", "sounds");
             var platformAssetsFolder = Path.Combine(platformFolder, "Content", "images");
+            var platformFontsFolder = Path.Combine(platformFolder, "Content", "fonts");
+            var platformFontsAssetsFolder = Path.Combine(platformFolder, "Assets", "fonts");
+            var platformSongsFolder = Path.Combine(platformFolder, "Content", "songs");
+            var platformSoundsFolder = Path.Combine(platformFolder, "Content", "sounds");
             var platformGameFolder = Path.Combine(platformFolder, "Game");
 
             var platformContent = Path.Combine(platformFolder, "Content");
@@ -110,12 +118,31 @@ namespace PenguioCLI
             if (Directory.Exists(platformAssetsFolder))
                 Directory.Delete(platformAssetsFolder, true);
 
+            if (Directory.Exists(platformFontsFolder))
+                Directory.Delete(platformFontsFolder, true);
+
+            if (Directory.Exists(platformFontsAssetsFolder))
+                Directory.Delete(platformFontsAssetsFolder, true);
+
+            if (Directory.Exists(platformSongsFolder))
+                Directory.Delete(platformSongsFolder, true);
+
+            if (Directory.Exists(platformSoundsFolder))
+                Directory.Delete(platformSoundsFolder, true);
+
             if (Directory.Exists(platformGameFolder))
                 Directory.Delete(platformGameFolder, true);
-            
-            //copy assets
-            var names = FileUtils.DirectoryCopy(platformContent, assetsFolder, platformAssetsFolder, true);
 
+            //copy assets
+            var names = FileUtils.DirectoryCopy(platformContent, imagesFolder, platformAssetsFolder, true);
+            var fontFiles = FileUtils.DirectoryCopy(platformContent, fontsFolder, platformFontsFolder, true);
+            FileUtils.DirectoryCopy(platformContent, fontsFolder, platformFontsAssetsFolder, true);
+            var songFiles = FileUtils.DirectoryCopy(platformContent, songsFolder, platformSongsFolder, true);
+            var soundsFiles = FileUtils.DirectoryCopy(platformContent, soundsFolder, platformSoundsFolder, true);
+
+            var xmlFontFiles = fontFiles.Where(a => a.EndsWith(".xml"));
+
+            names.AddRange(fontFiles.Where(a => a.EndsWith(".png")));
             var contentFile = new List<string>();
             contentFile.Add("/platform:Android");
             contentFile.Add("/profile:Reach");
@@ -130,6 +157,22 @@ namespace PenguioCLI
             contentFile.Add("/processorParam:MakeSquare=False");
             contentFile.Add("/processorParam:TextureFormat=Color");
             foreach (var name in names)
+            {
+                contentFile.Add("/build:" + name);
+            }
+
+            contentFile.Add("/importer:Mp3Importer");
+            contentFile.Add("/processor:SongProcessor");
+            contentFile.Add("/processorParam:Quality=Best");
+            foreach (var name in songFiles)
+            {
+                contentFile.Add("/build:" + name);
+            }
+
+            contentFile.Add("/importer:WavImporter");
+            contentFile.Add("/processor:SoundEffectProcessor");
+            contentFile.Add("/processorParam:Quality=Best");
+            foreach (var name in soundsFiles)
             {
                 contentFile.Add("/build:" + name);
             }
@@ -161,16 +204,40 @@ namespace PenguioCLI
                     }
                     break;
                 }
+                if (projItemGroup.ToArray().Any(a => a.Name == "Content"))
+                {
+                    foreach (var buildItem in projItemGroup.ToArray())
+                    {
+                        if (buildItem.Include.IndexOf("Content\\") == 0)
+                        {
+                            projItemGroup.RemoveItem(buildItem);
+                        }
+                        if (buildItem.Include.IndexOf("Assets\\") == 0)
+                        {
+                            projItemGroup.RemoveItem(buildItem);
+                        }
 
-
+                    }
+                    foreach (var engineFile in xmlFontFiles)
+                    {
+                        var fontContent = projItemGroup.AddNewItem("Content", "Assets\\" + engineFile);
+                        fontContent.SetMetadata("CopyToOutputDirectory", "Always");
+                    }
+                }
             }
             proj.Save(Path.Combine(androidPlatform, "Client.AndroidGame.csproj"));
 
             var pc = new ProjectCollection();
             pc.SetGlobalProperty("Configuration", "Debug");
-            pc.SetGlobalProperty("Platform", "Any CPU");
-            var buildRequestData = new BuildRequestData(new ProjectInstance(Path.Combine(androidPlatform, "Client.AndroidGame.csproj")), new [] { "SignAndroidPackage" ,"Install"});
-            var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc), buildRequestData);
+            pc.SetGlobalProperty("Platform", "Any CPU"); 
+            var buildRequestData = new BuildRequestData(new ProjectInstance(Path.Combine(androidPlatform, "Client.AndroidGame.csproj")), new[] { "SignAndroidPackage", "Install" });
+            var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc)
+            {
+                Loggers = new ILogger[]
+                {
+                    new ConsoleLogger(LoggerVerbosity.Normal)
+                }
+            }, buildRequestData);
             switch (j.OverallResult)
             {
                 case BuildResultCode.Success:
@@ -185,9 +252,9 @@ namespace PenguioCLI
             return j;
         }
 
-        public static void RunAndroidPlatform(string directory, ProjectConfig project,BuildResult build)
+        public static void RunAndroidPlatform(string directory, ProjectConfig project, BuildResult build)
         {
-//            var apk = Path.Combine(directory, @"platforms\Android\bin\Android\AnyCPU\Debug\com."+projectName+".game-Signed.apk");
+            //            var apk = Path.Combine(directory, @"platforms\Android\bin\Android\AnyCPU\Debug\com."+projectName+".game-Signed.apk");
             System.Diagnostics.Process.Start("adb", "shell am start -n com." + project.ProjectName + ".game/md5fe4548818b426bee4361f0bedb3504dc.MainActivity").WaitForExit();
         }
     }

@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Project = Microsoft.Build.BuildEngine.Project;
 
 namespace PenguioCLI
@@ -129,7 +130,7 @@ namespace PenguioCLI
 
             var xmlFontFiles = fontFiles.Where(a => a.EndsWith(".xml"));
 
-            names.AddRange(fontFiles.Where(a=>a.EndsWith(".png")));
+            names.AddRange(fontFiles.Where(a => a.EndsWith(".png")));
 
             var contentFile = new List<string>();
             contentFile.Add("/platform:Windows");
@@ -207,7 +208,7 @@ namespace PenguioCLI
                     }
                     foreach (var engineFile in xmlFontFiles)
                     {
-                        var fontContent=projItemGroup.AddNewItem("Content", "Content\\" + engineFile);
+                        var fontContent = projItemGroup.AddNewItem("Content", "Content\\" + engineFile);
                         fontContent.SetMetadata("CopyToOutputDirectory", "Always");
                     }
                 }
@@ -219,7 +220,14 @@ namespace PenguioCLI
             var pc = new ProjectCollection();
             pc.SetGlobalProperty("Configuration", "Debug");
             pc.SetGlobalProperty("Platform", "Any CPU");
-            var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc), new BuildRequestData(new ProjectInstance(Path.Combine(winDeskopPlatform, "Client.WindowsGame.csproj")), new string[] { "Rebuild" }));
+
+            var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc)
+            {
+                Loggers = new ILogger[]
+                {
+                    new ConsoleLogger(LoggerVerbosity.Normal)
+                }
+            }, new BuildRequestData(new ProjectInstance(Path.Combine(winDeskopPlatform, "Client.WindowsGame.csproj")), new string[] { "Rebuild" }));
             switch (j.OverallResult)
             {
                 case BuildResultCode.Success:
@@ -237,7 +245,7 @@ namespace PenguioCLI
         public static void RunWindowsPlatform(BuildResult build)
         {
             var exe = build.ResultsByTarget["Rebuild"].Items.First().ItemSpec;
-            Directory.SetCurrentDirectory(exe.Replace("Client.WindowsGame.exe",""));
+            Directory.SetCurrentDirectory(exe.Replace("Client.WindowsGame.exe", ""));
             System.Diagnostics.Process.Start(exe);
         }
     }

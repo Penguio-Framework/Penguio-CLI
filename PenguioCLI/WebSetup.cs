@@ -10,6 +10,7 @@ using System.Web;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Project = Microsoft.Build.BuildEngine.Project;
 
 namespace PenguioCLI
@@ -162,7 +163,13 @@ namespace PenguioCLI
             pc.SetGlobalProperty("Configuration", "Debug");
             pc.SetGlobalProperty("Platform", "Any CPU");
             var buildRequestData = new BuildRequestData(new ProjectInstance(Path.Combine(webPlatform, "Client.WebGame.csproj")), new[] { "Rebuild" });
-            var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc), buildRequestData);
+            var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc)
+            {
+                Loggers = new ILogger[]
+                {
+                    new ConsoleLogger(LoggerVerbosity.Normal)
+                }
+            }, buildRequestData);
             switch (j.OverallResult)
             {
                 case BuildResultCode.Success:
