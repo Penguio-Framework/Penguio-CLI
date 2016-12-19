@@ -13,7 +13,7 @@ namespace PenguioCLI
         {
 //            commands = new[] { "platform", "rm", "web"};
 //            commands = new[] { "platform", "add", "web", @"C:\code\penguio\Penguio-Framework" };
-//            commands = new[] { "platform", "run", "web" };
+            commands = new[] { "platform", "run", "wd" };
             //            commands = new[] { "platform", "run", "android" };
             var directory = Directory.GetCurrentDirectory();
             directory = @"C:\code\penguio\PenguinShuffle";

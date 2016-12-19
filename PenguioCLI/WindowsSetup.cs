@@ -93,8 +93,15 @@ namespace PenguioCLI
                 throw new Exception("Windows Desktop platform does not exist");
             }
             var platformFolder = Path.Combine(directory, "platforms", "WindowsDesktop");
-            var assetsFolder = Path.Combine(directory, "assets", "images");
+            var imagesFolder = Path.Combine(directory, "assets", "images");
+            var fontsFolder = Path.Combine(directory, "assets", "fonts");
+            var songsFolder = Path.Combine(directory, "assets", "songs");
+            var soundsFolder = Path.Combine(directory, "assets", "sounds");
             var platformAssetsFolder = Path.Combine(platformFolder, "Content", "images");
+            var platformFontsFolder = Path.Combine(platformFolder, "Content", "fonts");
+            var platformSongsFolder = Path.Combine(platformFolder, "Content", "songs");
+            var platformSoundsFolder = Path.Combine(platformFolder, "Content", "sounds");
+
             var platformGameFolder = Path.Combine(platformFolder, "Game");
 
             var platformContent = Path.Combine(platformFolder, "Content");
@@ -103,10 +110,26 @@ namespace PenguioCLI
             if (Directory.Exists(platformAssetsFolder))
                 Directory.Delete(platformAssetsFolder, true);
 
+            if (Directory.Exists(platformFontsFolder))
+                Directory.Delete(platformFontsFolder, true);
+
+            if (Directory.Exists(platformSongsFolder))
+                Directory.Delete(platformSongsFolder, true);
+
+            if (Directory.Exists(platformSoundsFolder))
+                Directory.Delete(platformSoundsFolder, true);
+
             if (Directory.Exists(platformGameFolder))
                 Directory.Delete(platformGameFolder, true);
             //copy assets
-            var names = FileUtils.DirectoryCopy(platformContent, assetsFolder, platformAssetsFolder, true);
+            var names = FileUtils.DirectoryCopy(platformContent, imagesFolder, platformAssetsFolder, true);
+            var fontFiles = FileUtils.DirectoryCopy(platformContent, fontsFolder, platformFontsFolder, true);
+            var songFiles = FileUtils.DirectoryCopy(platformContent, songsFolder, platformSongsFolder, true);
+            var soundsFiles = FileUtils.DirectoryCopy(platformContent, soundsFolder, platformSoundsFolder, true);
+
+            var xmlFontFiles = fontFiles.Where(a => a.EndsWith(".xml"));
+
+            names.AddRange(fontFiles.Where(a=>a.EndsWith(".png")));
 
             var contentFile = new List<string>();
             contentFile.Add("/platform:Windows");
@@ -125,6 +148,25 @@ namespace PenguioCLI
             {
                 contentFile.Add("/build:" + name);
             }
+
+
+            contentFile.Add("/importer:Mp3Importer");
+            contentFile.Add("/processor:SongProcessor");
+            contentFile.Add("/processorParam:Quality=Best");
+            foreach (var name in songFiles)
+            {
+                contentFile.Add("/build:" + name);
+            }
+
+            contentFile.Add("/importer:WavImporter");
+            contentFile.Add("/processor:SoundEffectProcessor");
+            contentFile.Add("/processorParam:Quality=Best");
+            foreach (var name in soundsFiles)
+            {
+                contentFile.Add("/build:" + name);
+            }
+
+
             File.WriteAllLines(Path.Combine(platformContent, "Content.mgcb"), contentFile);
 
 
@@ -146,12 +188,28 @@ namespace PenguioCLI
                         {
                             projItemGroup.RemoveItem(buildItem);
                         }
+
                     }
                     foreach (var engineFile in gameFiles)
                     {
                         projItemGroup.AddNewItem("Compile", "Game\\" + engineFile);
                     }
-                    break;
+                }
+                if (projItemGroup.ToArray().Any(a => a.Name == "Content"))
+                {
+                    foreach (var buildItem in projItemGroup.ToArray())
+                    {
+                        if (buildItem.Include.IndexOf("Content\\") == 0)
+                        {
+                            projItemGroup.RemoveItem(buildItem);
+                        }
+
+                    }
+                    foreach (var engineFile in xmlFontFiles)
+                    {
+                        var fontContent=projItemGroup.AddNewItem("Content", "Content\\" + engineFile);
+                        fontContent.SetMetadata("CopyToOutputDirectory", "Always");
+                    }
                 }
 
 
@@ -179,6 +237,7 @@ namespace PenguioCLI
         public static void RunWindowsPlatform(BuildResult build)
         {
             var exe = build.ResultsByTarget["Rebuild"].Items.First().ItemSpec;
+            Directory.SetCurrentDirectory(exe.Replace("Client.WindowsGame.exe",""));
             System.Diagnostics.Process.Start(exe);
         }
     }
