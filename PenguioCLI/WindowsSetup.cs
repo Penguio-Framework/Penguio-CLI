@@ -12,7 +12,7 @@ namespace PenguioCLI
 {
     public class WindowsSetup
     {
-        public static void AddWindowsPlatform(string directory, string path, ProjectConfig project)
+        public static void Add(string directory, string path, ProjectConfig project)
         {
 
 
@@ -81,7 +81,7 @@ namespace PenguioCLI
             proj.Save(Path.Combine(winDeskopPlatform, "Client.WindowsGame.csproj"));
         }
 
-        public static BuildResult BuildWindowsPlatform(string directory)
+        public static BuildResult Build(string directory)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -242,11 +242,17 @@ namespace PenguioCLI
             return j;
         }
 
-        public static void RunWindowsPlatform(BuildResult build)
+        public static void Run(BuildResult build)
         {
             var exe = build.ResultsByTarget["Build"].Items.First().ItemSpec;
             Directory.SetCurrentDirectory(exe.Replace("Client.WindowsGame.exe", ""));
             System.Diagnostics.Process.Start(exe);
+        }
+
+        public static void Debug(string directory)
+        {
+            var winDeskopPlatform = Path.Combine(directory, "platforms", "WindowsDesktop");
+            System.Diagnostics.Process.Start(Path.Combine(winDeskopPlatform, "Client.WindowsGame.sln"));
         }
     }
 }

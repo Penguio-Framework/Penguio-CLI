@@ -12,7 +12,7 @@ namespace PenguioCLI
 {
     public class AndroidSetup
     {
-        public static void AddAndroidPlatform(string directory, string path, ProjectConfig project)
+        public static void Add(string directory, string path, ProjectConfig project)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -87,7 +87,7 @@ namespace PenguioCLI
             proj.Save(Path.Combine(androidPlatform, "Client.AndroidGame.csproj"));
         }
 
-        public static BuildResult BuildAndroidPlatform(string directory)
+        public static BuildResult Build(string directory)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -247,10 +247,16 @@ namespace PenguioCLI
             return j;
         }
 
-        public static void RunAndroidPlatform(string directory, ProjectConfig project, BuildResult build)
+        public static void Run(string directory, ProjectConfig project, BuildResult build)
         {
             //            var apk = Path.Combine(directory, @"platforms\Android\bin\Android\AnyCPU\Debug\com."+projectName+".game-Signed.apk");
             System.Diagnostics.Process.Start("adb", "shell am start -n com." + project.ProjectName + ".game/md5fe4548818b426bee4361f0bedb3504dc.MainActivity").WaitForExit();
         }
+        public static void Debug(string directory)
+        {
+            var androidPlatform = Path.Combine(directory, "platforms", "Android");
+            System.Diagnostics.Process.Start(Path.Combine(androidPlatform, "Client.AndroidGame.sln"));
+        }
+
     }
 }

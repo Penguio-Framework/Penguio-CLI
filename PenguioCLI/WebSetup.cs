@@ -13,7 +13,7 @@ namespace PenguioCLI
 {
     public class WebSetup
     {
-        public static void AddWebPlatform(string directory, string path, ProjectConfig project)
+        public static void Add(string directory, string path, ProjectConfig project)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -77,7 +77,7 @@ namespace PenguioCLI
             proj.Save(Path.Combine(webPlatform, "Client.WebGame.csproj"));
         }
 
-        public static BuildResult BuildWebPlatform(string directory, ProjectConfig project)
+        public static BuildResult Build(string directory, ProjectConfig project)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -180,31 +180,23 @@ namespace PenguioCLI
 
             var jsFiles = "";
             jsFiles += $"<script type=\"text/javascript\" src=\"js/bridge.min.js\" ></script>";
-            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.interfaces.min.js\" ></script>";
-            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.min.js\" ></script>";
-            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.web.min.js\" ></script>";
-            jsFiles += $"<script type=\"text/javascript\" src=\"js/engine.animation.min.js\" ></script>";
-
-            jsFiles += $"<script type=\"text/javascript\" src=\"js/client.min.js\" ></script>";
-            jsFiles += $"<script type=\"text/javascript\" src=\"js/client.web.min.js\" ></script>";
-
-
-            foreach (var file in Directory.GetFiles(Path.Combine(platformOutput, "js"), project.ProjectName + "*.js").Where(a => a.Contains(".min.")))
-            {
-                jsFiles += $"<script type=\"text/javascript\" src=\"{file.Replace(platformOutput + "\\", "")}\" ></script>";
-            }
+            jsFiles += $"<script type=\"text/javascript\" src=\"js/WebGame.min.js\" ></script>";
 
             File.WriteAllText(Path.Combine(platformOutput, "index.html"), "<!DOCTYPE html><html><head><style>body {padding: 50px;font: 14px \"Lucida Grande\", Helvetica, Arial, sans-serif;}* {margin: 0;padding: 0;}html, body {width: 100%;height: 100%;}canvas {display: block;margin: 0;position: absolute;top: 0;left: 0;z-index: 0;}.clickManager {display: block;margin: 0;position: absolute;top: 0;left: 0;z-index: 0;}</style></head><body>{{{js}}}</body></html>".Replace("{{{js}}}", jsFiles));
-
-
 
             return j;
         }
 
-        public static void RunWebPlatform(string directory, ProjectConfig project, BuildResult build)
+        public static void Run(string directory, ProjectConfig project, BuildResult build)
         {
             Console.WriteLine("Server running on 8018");
             new SimpleHttpServer(Path.Combine(directory, "platforms/Web/bin/output"), 8018);
+        }
+
+        public static void Debug(string directory)
+        {
+            var webPlatform = Path.Combine(directory, "platforms", "Web");
+            System.Diagnostics.Process.Start(Path.Combine(webPlatform, "Client.WebGame.sln"));
         }
     }
 }
