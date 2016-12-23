@@ -16,9 +16,9 @@ namespace PenguioCLI
             //            commands = new[] { "platform", "rm", "web"};
 //                                                commands = new[] { "platform", "add", "web" };
             //            commands = new[] { "platform", "rm", "web" };
-//                                                commands = new[] {  "run", "web" };
+//                                                commands = new[] {  "run", "wd" };
             var directory = Directory.GetCurrentDirectory();
-//                                                directory = @"C:\code\penguio\bingoblockparty";
+//                                                directory = @"C:\code\penguio\penguinshuffle";
 
             project = JsonConvert.DeserializeObject<ProjectConfig>(File.ReadAllText(Path.Combine(directory, "config.json")));
 

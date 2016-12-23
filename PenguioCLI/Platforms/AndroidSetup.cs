@@ -50,10 +50,7 @@ namespace PenguioCLI.Platforms
             Directory.CreateDirectory(Path.Combine(androidPlatform, "Game"));
             var engineFiles = FileUtils.DirectoryCopy(Path.Combine(androidPlatform), Path.Combine(path, "Engine"), Path.Combine(androidPlatform, "Engine"), true, "*.cs");
             engineFiles.AddRange(FileUtils.DirectoryCopy(Path.Combine(androidPlatform), Path.Combine(path, "Engine.Xna"), Path.Combine(androidPlatform, "Engine.Xna"), true, "*.cs"));
-            engineFiles.Add(Path.Combine("Game", "Game.cs"));
 
-            var contents = "using System;using Engine.Interfaces;namespace {{{projectName}}}{public class Game : IGame{public void InitScreens(IRenderer renderer, IScreenManager screenManager){throw new NotImplementedException();}public void LoadAssets(IRenderer renderer){throw new NotImplementedException();}public void BeforeTick(){throw new NotImplementedException();}public void AfterTick(){throw new NotImplementedException();}public void BeforeDraw(){throw new NotImplementedException();}public void AfterDraw(){throw new NotImplementedException();}public IClient Client { get; set; }public AssetManager AssetManager { get; set; }}}";
-            File.WriteAllText(Path.Combine(androidPlatform, "Game", "Game.cs"), contents.Replace("{{{projectName}}}", project.ProjectName));
             File.WriteAllText(Path.Combine(androidPlatform, "GameClient.cs"), File.ReadAllText(Path.Combine(androidPlatform, "GameClient.cs")).Replace("{{{projectName}}}", "new " + project.ProjectName + ".Game()"));
 
             File.WriteAllText(Path.Combine(androidPlatform, "Properties/AndroidManifest.xml"), File.ReadAllText(Path.Combine(androidPlatform, "Properties/AndroidManifest.xml")).Replace("{{{projectName}}}", project.ProjectName));
@@ -79,6 +76,9 @@ namespace PenguioCLI.Platforms
                     {
                         projItemGroup.AddNewItem("Compile", engineFile);
                     }
+                    var item = projItemGroup.AddNewItem("Compile", "..\\..\\src\\**\\*.cs");
+                    item.SetMetadata("Link", "Game\\%(RecursiveDir)%(Filename)%(Extension)");
+                    item.SetMetadata("CopyToOutputDirectory", "PreserveNewest");
                     break;
                 }
 
@@ -113,7 +113,6 @@ namespace PenguioCLI.Platforms
 
             var platformContent = Path.Combine(platformFolder, "Content");
             var androidPlatform = Path.Combine(directory, "platforms", "Android");
-            var gameSrc = Path.Combine(directory, "src");
 
             if (Directory.Exists(platformAssetsFolder))
                 Directory.Delete(platformAssetsFolder, true);
@@ -179,30 +178,11 @@ namespace PenguioCLI.Platforms
             File.WriteAllLines(Path.Combine(platformContent, "Content.mgcb"), contentFile);
 
 
-            var gameFiles = FileUtils.DirectoryCopy(platformGameFolder, gameSrc, platformGameFolder, true, "*.cs");
-
-
-
-
             Engine eng = new Engine();
             Project proj = new Project(eng);
             proj.Load(Path.Combine(androidPlatform, "Client.AndroidGame.csproj"));
             foreach (BuildItemGroup projItemGroup in proj.ItemGroups)
             {
-                if (projItemGroup.ToArray().Any(a => a.Name == "Compile"))
-                {
-                    foreach (var buildItem in projItemGroup.ToArray())
-                    {
-                        if (buildItem.Include.IndexOf("Game\\") == 0)
-                        {
-                            projItemGroup.RemoveItem(buildItem);
-                        }
-                    }
-                    foreach (var engineFile in gameFiles)
-                    {
-                        projItemGroup.AddNewItem("Compile", "Game\\" + engineFile);
-                    }
-                }
                 if (projItemGroup.ToArray().Any(a => a.Name == "AndroidAsset"))
                 {
                     foreach (var buildItem in projItemGroup.ToArray())

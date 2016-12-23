@@ -44,13 +44,8 @@ namespace PenguioCLI.Platforms
 
             Directory.CreateDirectory(Path.Combine(winDeskopPlatform, "Engine"));
             Directory.CreateDirectory(Path.Combine(winDeskopPlatform, "Engine.Xna"));
-            Directory.CreateDirectory(Path.Combine(winDeskopPlatform, "Game"));
             var engineFiles = FileUtils.DirectoryCopy(Path.Combine(winDeskopPlatform), Path.Combine(path, "Engine"), Path.Combine(winDeskopPlatform, "Engine"), true, "*.cs");
             engineFiles.AddRange(FileUtils.DirectoryCopy(Path.Combine(winDeskopPlatform), Path.Combine(path, "Engine.Xna"), Path.Combine(winDeskopPlatform, "Engine.Xna"), true, "*.cs"));
-            engineFiles.Add(Path.Combine("Game", "Game.cs"));
-
-            var contents = "using System;using Engine.Interfaces;namespace {{{projectName}}}{public class Game : IGame{public void InitScreens(IRenderer renderer, IScreenManager screenManager){throw new NotImplementedException();}public void LoadAssets(IRenderer renderer){throw new NotImplementedException();}public void BeforeTick(){throw new NotImplementedException();}public void AfterTick(){throw new NotImplementedException();}public void BeforeDraw(){throw new NotImplementedException();}public void AfterDraw(){throw new NotImplementedException();}public IClient Client { get; set; }public AssetManager AssetManager { get; set; }}}";
-            File.WriteAllText(Path.Combine(winDeskopPlatform, "Game", "Game.cs"), contents.Replace("{{{projectName}}}", project.ProjectName));
             File.WriteAllText(Path.Combine(winDeskopPlatform, "GameClient.cs"), File.ReadAllText(Path.Combine(winDeskopPlatform, "GameClient.cs")).Replace("{{{projectName}}}", "new " + project.ProjectName + ".Game()"));
 
             engineFiles.Add("GameClient.cs");
@@ -73,6 +68,9 @@ namespace PenguioCLI.Platforms
                     {
                         projItemGroup.AddNewItem("Compile", engineFile);
                     }
+                    var item = projItemGroup.AddNewItem("Compile", "..\\..\\src\\**\\*.cs");
+                    item.SetMetadata("Link", "Game\\%(RecursiveDir)%(Filename)%(Extension)");
+                    item.SetMetadata("CopyToOutputDirectory", "PreserveNewest");
                     break;
                 }
 
@@ -107,7 +105,6 @@ namespace PenguioCLI.Platforms
 
             var platformContent = Path.Combine(platformFolder, "Content");
             var winDeskopPlatform = Path.Combine(directory, "platforms", "WindowsDesktop");
-            var gameSrc = Path.Combine(directory, "src");
             if (Directory.Exists(platformAssetsFolder))
                 Directory.Delete(platformAssetsFolder, true);
 
@@ -171,32 +168,13 @@ namespace PenguioCLI.Platforms
             File.WriteAllLines(Path.Combine(platformContent, "Content.mgcb"), contentFile);
 
 
-            var gameFiles = FileUtils.DirectoryCopy(platformGameFolder, gameSrc, platformGameFolder, true, "*.cs");
-
-
-
 
             Engine eng = new Engine();
             Project proj = new Project(eng);
             proj.Load(Path.Combine(winDeskopPlatform, "Client.WindowsGame.csproj"));
             foreach (BuildItemGroup projItemGroup in proj.ItemGroups)
             {
-                if (projItemGroup.ToArray().Any(a => a.Name == "Compile"))
-                {
-                    foreach (var buildItem in projItemGroup.ToArray())
-                    {
-                        if (buildItem.Include.IndexOf("Game\\") == 0)
-                        {
-                            projItemGroup.RemoveItem(buildItem);
-                        }
-
-                    }
-                    foreach (var engineFile in gameFiles)
-                    {
-                        projItemGroup.AddNewItem("Compile", "Game\\" + engineFile);
-                    }
-                }
-                if (projItemGroup.ToArray().Any(a => a.Name == "Content"))
+                 if (projItemGroup.ToArray().Any(a => a.Name == "Content"))
                 {
                     foreach (var buildItem in projItemGroup.ToArray())
                     {
