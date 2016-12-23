@@ -87,13 +87,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Platforms\IosSetup.cs" />
     <Compile Include="SimpleHttpServer.cs" />
-    <Compile Include="WebSetup.cs" />
+    <Compile Include="Platforms\WebSetup.cs" />
     <Compile Include="FileUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AndroidSetup.cs" />
-    <Compile Include="WindowsSetup.cs" />
+    <Compile Include="Platforms\AndroidSetup.cs" />
+    <Compile Include="Platforms\WindowsSetup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

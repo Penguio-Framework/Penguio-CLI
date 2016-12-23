@@ -40,3 +40,13 @@ generate splash screen
 '/get web working
 get ios working
 	https://forums.xamarin.com/discussion/3696/how-to-build-from-msbuild-command-line-trig-build-on-osx-from-windows
+
+
+setup support for visual studio plugin, switch platform and run
+
+
+
+for ios:
+	plug in iphone
+	create provisioning profile for the package name
+	now you can deploy from windows

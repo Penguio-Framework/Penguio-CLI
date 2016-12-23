@@ -1,15 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
-using System.Web;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Project = Microsoft.Build.BuildEngine.Project;
 
-namespace PenguioCLI
+namespace PenguioCLI.Platforms
 {
     public class WebSetup
     {

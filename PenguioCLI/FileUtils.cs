@@ -29,6 +29,7 @@ namespace PenguioCLI
             FileInfo[] files = filter == null ? dir.GetFiles() : dir.GetFiles(filter);
             foreach (FileInfo file in files)
             {
+                if (file.Name .StartsWith(".")) continue;
                 string temppath = Path.Combine(destDirName, file.Name);
                 fileNames.Add(temppath.Replace(root + "\\", ""));
                 file.CopyTo(temppath, true);

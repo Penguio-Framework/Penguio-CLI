@@ -3,6 +3,7 @@ using System.IO;
 using LibGit2Sharp;
 using Microsoft.Build.Execution;
 using Newtonsoft.Json;
+using PenguioCLI.Platforms;
 
 namespace PenguioCLI
 {
@@ -74,6 +75,10 @@ namespace PenguioCLI
                                 case "a":
                                     AndroidSetup.Add(directory, path, project);
                                     return;
+                                case "ios":
+                                case "i":
+                                    IOSSetup.Add(directory, path, project);
+                                    return;
                             }
 
                             break;
@@ -97,6 +102,11 @@ namespace PenguioCLI
                                 case "a":
                                     if (Directory.Exists(Path.Combine(directory, "platforms", "Android")))
                                         Directory.Delete(Path.Combine(directory, "platforms", "Android"), true);
+                                    return;
+                                case "ios":
+                                case "i":
+                                    if (Directory.Exists(Path.Combine(directory, "platforms", "IOS")))
+                                        Directory.Delete(Path.Combine(directory, "platforms", "IOS"), true);
                                     return;
                             }
 
@@ -122,6 +132,10 @@ namespace PenguioCLI
                         case "a":
                             AndroidSetup.Build(directory);
                             return;
+                        case "ios":
+                        case "i":
+                            IOSSetup.Build(directory,project);
+                            return;
                     }
                     break;
                 case "debug":
@@ -140,6 +154,10 @@ namespace PenguioCLI
                         case "android":
                         case "a":
                             AndroidSetup.Debug(directory);
+                            return;
+                        case "ios":
+                        case "i":
+                            IOSSetup.Debug(directory);
                             return;
                     }
 
@@ -167,6 +185,11 @@ namespace PenguioCLI
                             build = AndroidSetup.Build(directory);
                             AndroidSetup.Run(directory, project, build);
                             return;
+                        case "ios":
+                        case "i":
+                            build = IOSSetup.Build(directory,project);
+                            IOSSetup.Run(directory, project, build);
+                            return;
                     }
                     break;
             }
@@ -179,5 +202,13 @@ namespace PenguioCLI
     public class ProjectConfig
     {
         public string ProjectName { get; set; }
+        public IosConfig Ios { get; set; }
+    }
+
+    public class IosConfig
+    {
+        public string ServerAddress { get; set; }
+        public string ServerUser { get; set; }
+        public string ServerPassword { get; set; }
     }
 }

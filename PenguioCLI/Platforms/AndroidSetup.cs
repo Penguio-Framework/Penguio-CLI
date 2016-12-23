@@ -8,7 +8,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Project = Microsoft.Build.BuildEngine.Project;
 
-namespace PenguioCLI
+namespace PenguioCLI.Platforms
 {
     public class AndroidSetup
     {
