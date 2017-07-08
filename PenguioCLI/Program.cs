@@ -11,14 +11,16 @@ namespace PenguioCLI
     {
         private static ProjectConfig project;
 
+        [STAThread]
         static void Main(string[] commands)
         {
-            //            commands = new[] {   "rm", "web"};
+            commands = new[] { "run", "android", "local" };
+//            commands = new[] { "generate", "font" };
             //                                                commands = new[] {   "add", "web" };
             //            commands = new[] {   "rm", "web" };
             //                                                commands = new[] {  "run", "wd" };
             var directory = Directory.GetCurrentDirectory();
-            //                                                directory = @"C:\code\penguio\penguinshuffle";
+            directory = @"C:\code\penguio\penguinshuffle";
 
             project = JsonConvert.DeserializeObject<ProjectConfig>(File.ReadAllText(Path.Combine(directory, "config.json")));
 
@@ -27,6 +29,7 @@ namespace PenguioCLI
             {
                 Console.WriteLine("Penguio CLI");
                 Console.WriteLine("Usage:");
+                Console.WriteLine("peng generate font");
                 Console.WriteLine("peng add WindowsDesktop");
                 Console.WriteLine("peng rm Android");
                 Console.WriteLine("peng build Web");
@@ -78,6 +81,14 @@ namespace PenguioCLI
                     }
 
                     break;
+                case "generate":
+                case "g":
+
+                    if (commands[1].ToLower() == "font")
+                    {
+                        FontGenerator.Generate(directory);
+                    }
+                    return;
                 case "remove":
                 case "rm":
                     switch (commands[1].ToLower())
