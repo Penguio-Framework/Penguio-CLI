@@ -5,6 +5,7 @@ using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Project = Microsoft.Build.BuildEngine.Project;
 
 namespace PenguioCLI.Platforms
@@ -73,7 +74,7 @@ namespace PenguioCLI.Platforms
             proj.Save(Path.Combine(webPlatform, "Client.WebGame.csproj"));
         }
 
-        public static BuildResult Build(string directory, ProjectConfig project)
+        public static BuildResult Build(string directory)
         {
 
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
@@ -132,7 +133,7 @@ namespace PenguioCLI.Platforms
             {
                 Loggers = new ILogger[]
                 {
-                    new ConsoleLogger(LoggerVerbosity.Normal)
+                    new Microsoft.Build.Logging.ConsoleLogger(LoggerVerbosity.Normal)
                 }
             }, buildRequestData);
             switch (j.OverallResult)

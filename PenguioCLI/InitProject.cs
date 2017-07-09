@@ -38,6 +38,11 @@ namespace PenguioCLI
             File.WriteAllText(Path.Combine(gamePath, "src", gameName + ".csproj"), File.ReadAllText(Path.Combine(Extensions.ExeDirectory(), "Init", "GameName.csproj")).Replace("{{{GameName}}}", gameName));
             File.WriteAllText(Path.Combine(gamePath, "src", gameName + ".sln"), File.ReadAllText(Path.Combine(Extensions.ExeDirectory(), "Init", "GameName.sln")).Replace("{{{GameName}}}", gameName));
             File.WriteAllText(Path.Combine(gamePath, "src", "Game.cs"), File.ReadAllText(Path.Combine(Extensions.ExeDirectory(), "Init", "Game.cs")).Replace("{{{GameName}}}", gameName));
+            File.WriteAllText(Path.Combine(gamePath, "src", "LandingAreaLayout.cs"), File.ReadAllText(Path.Combine(Extensions.ExeDirectory(), "Init", "LandingAreaLayout.cs")).Replace("{{{GameName}}}", gameName));
+            Directory.CreateDirectory(Path.Combine(gamePath, "assets", "images", "Landing"));
+
+            File.Copy(Path.Combine(Extensions.ExeDirectory(), "Init", "assets", "Landing", "hello-world.png"), Path.Combine(gamePath, "assets", "images", "Landing", "hello-world.png"));
+            File.Copy(Path.Combine(Extensions.ExeDirectory(), "Init", "assets", "Landing", "welcome.png"), Path.Combine(gamePath, "assets", "images", "Landing", "welcome.png"));
             AssetGenerator.Generate(gamePath, gameName);
         }
 

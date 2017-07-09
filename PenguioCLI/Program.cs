@@ -27,9 +27,9 @@ namespace PenguioCLI
             {
                 /*
             commands = new[] { "generate", "font" };
-            commands = new[] { "init", "OrbitalCrash" };
-            commands = new[] { "run", "android", "local" };
 */
+//                commands = new[] { "init", "OrbitalCrash" };
+
                 //            commands = new[] { "generate", "assets" };
 
                 //                                                commands = new[] {   "add", "web" };
@@ -37,9 +37,9 @@ namespace PenguioCLI
                 //                                                commands = new[] {  "run", "wd" };
                 var directory = Directory.GetCurrentDirectory();
                 /*
-                            directory = @"C:\code\penguio\";
+                            directory = @"C:\code\penguio\orbitalcrash\";
                 */
-                //            directory = @"C:\code\penguio\PenguinShuffle\";
+//                directory = @"C:\code\penguio\";
 
 
 
@@ -53,6 +53,7 @@ namespace PenguioCLI
                     Console.WriteLine("peng add WindowsDesktop");
                     Console.WriteLine("peng rm Android");
                     Console.WriteLine("peng build Web");
+                    Console.WriteLine("peng clean WindowsDesktop");
                     Console.WriteLine("peng debug Android");
                     Console.WriteLine("peng run iOS");
                     return;
@@ -70,43 +71,46 @@ namespace PenguioCLI
                         return;
                     case "add":
                     case "a":
-                        string path;
-
-                        if (commands.Length == 2)
                         {
-                            var workdirPath = Path.GetTempPath();
-                            var framework = Path.Combine(workdirPath, "penguio-framework", Guid.NewGuid().ToString());
-                            if (Directory.Exists(framework))
-                                Directory.Delete(framework, true);
-                            Directory.CreateDirectory(framework);
-                            Repository.Clone("https://github.com/Penguio-Framework/Penguio-Framework.git", framework);
-                            path = framework;
-                        }
-                        else
-                        {
-                            path = commands[2] == "local" ? @"C:\code\penguio\Penguio-Framework" : commands[2];
+                            string path;
 
-                        }
-                        switch (commands[1].ToLower())
-                        {
+                            if (commands.Length == 2)
+                            {
+                                var workdirPath = Path.GetTempPath();
+                                var framework = Path.Combine(workdirPath, "penguio-framework", Guid.NewGuid().ToString());
+                                if (Directory.Exists(framework))
+                                    Directory.Delete(framework, true);
+                                Directory.CreateDirectory(framework);
+                                Repository.Clone("https://github.com/Penguio-Framework/Penguio-Framework.git", framework);
+                                path = framework;
+                            }
+                            else
+                            {
+                                path = commands[2] == "local" ? @"C:\code\penguio\Penguio-Framework" : commands[2];
 
-                            case "windowsdesktop":
-                            case "windows":
-                            case "wd":
-                                WindowsSetup.Add(directory, path, getProject(directory));
-                                return;
-                            case "web":
-                            case "w":
-                                WebSetup.Add(directory, path, getProject(directory));
-                                return;
-                            case "android":
-                            case "a":
-                                AndroidSetup.Add(directory, path, getProject(directory));
-                                return;
-                            case "ios":
-                            case "i":
-                                IOSSetup.Add(directory, path, getProject(directory));
-                                return;
+                            }
+                            switch (commands[1].ToLower())
+                            {
+
+                                case "windowsdesktop":
+                                case "windows":
+                                case "wd":
+                                    WindowsSetup.Add(directory, path, getProject(directory));
+                                    return;
+                                case "web":
+                                case "w":
+                                    WebSetup.Add(directory, path, getProject(directory));
+                                    return;
+                                case "android":
+                                case "a":
+                                    AndroidSetup.Add(directory, path, getProject(directory));
+                                    return;
+                                case "ios":
+                                case "i":
+                                    IOSSetup.Add(directory, path, getProject(directory));
+                                    return;
+                            }
+
                         }
 
                         break;
@@ -120,6 +124,58 @@ namespace PenguioCLI
                         if (commands[1].ToLower() == "assets")
                         {
                             AssetGenerator.Generate(directory, getProject(directory).ProjectName);
+                        }
+                        return;
+                    case "clean":
+                    case "c":
+                        {
+                            string path;
+
+                            if (commands.Length == 2)
+                            {
+                                var workdirPath = Path.GetTempPath();
+                                var framework = Path.Combine(workdirPath, "penguio-framework", Guid.NewGuid().ToString());
+                                if (Directory.Exists(framework))
+                                    Directory.Delete(framework, true);
+                                Directory.CreateDirectory(framework);
+                                Repository.Clone("https://github.com/Penguio-Framework/Penguio-Framework.git", framework);
+                                path = framework;
+                            }
+                            else
+                            {
+                                path = commands[2] == "local" ? @"C:\code\penguio\Penguio-Framework" : commands[2];
+
+                            }
+                            switch (commands[1].ToLower())
+                            {
+
+                                case "windowsdesktop":
+                                case "windows":
+                                case "wd":
+                                    if (Directory.Exists(Path.Combine(directory, "platforms", "WindowsDesktop")))
+                                        Directory.Delete(Path.Combine(directory, "platforms", "WindowsDesktop"), true);
+                                    WindowsSetup.Add(directory, path, getProject(directory));
+                                    return;
+                                case "web":
+                                case "w":
+                                    if (Directory.Exists(Path.Combine(directory, "platforms", "Web")))
+                                        Directory.Delete(Path.Combine(directory, "platforms", "Web"), true);
+                                    WebSetup.Add(directory, path, getProject(directory));
+                                    return;
+                                case "android":
+                                case "a":
+                                    if (Directory.Exists(Path.Combine(directory, "platforms", "Android")))
+                                        Directory.Delete(Path.Combine(directory, "platforms", "Android"), true);
+                                    AndroidSetup.Add(directory, path, getProject(directory));
+                                    return;
+                                case "ios":
+                                case "i":
+                                    if (Directory.Exists(Path.Combine(directory, "platforms", "IOS")))
+                                        Directory.Delete(Path.Combine(directory, "platforms", "IOS"), true);
+                                    IOSSetup.Add(directory, path, getProject(directory));
+                                    return;
+                            }
+
                         }
                         return;
                     case "remove":
@@ -165,7 +221,7 @@ namespace PenguioCLI
                                 return;
                             case "web":
                             case "w":
-                                WebSetup.Build(directory, getProject(directory));
+                                WebSetup.Build(directory);
                                 return;
                             case "android":
                             case "a":
@@ -185,18 +241,22 @@ namespace PenguioCLI
                             case "windowsdesktop":
                             case "windows":
                             case "wd":
+                                WindowsSetup.Build(directory);
                                 WindowsSetup.Debug(directory);
                                 return;
                             case "web":
                             case "w":
+                                WebSetup.Build(directory);
                                 WebSetup.Debug(directory);
                                 return;
                             case "android":
                             case "a":
+                                AndroidSetup.Build(directory);
                                 AndroidSetup.Debug(directory);
                                 return;
                             case "ios":
                             case "i":
+                                IOSSetup.Build(directory, getProject(directory));
                                 IOSSetup.Debug(directory);
                                 return;
                         }
@@ -218,7 +278,7 @@ namespace PenguioCLI
 
                             case "web":
                             case "w":
-                                build = WebSetup.Build(directory, getProject(directory));
+                                build = WebSetup.Build(directory);
                                 WebSetup.Run(directory, getProject(directory), build);
                                 return;
                             case "android":
@@ -243,7 +303,7 @@ namespace PenguioCLI
             }
         }
 
-       
+
     }
 
     public class ProjectConfig

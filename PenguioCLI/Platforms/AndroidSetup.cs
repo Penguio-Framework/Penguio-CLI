@@ -206,12 +206,13 @@ namespace PenguioCLI.Platforms
             pc.SetGlobalProperty("Configuration", "Debug");
             pc.SetGlobalProperty("Platform", "Any CPU"); 
             var buildRequestData = new BuildRequestData(new ProjectInstance(Path.Combine(androidPlatform, "Client.AndroidGame.csproj")), new[] { "SignAndroidPackage", "Install" });
+
             var j = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc)
             {
                 Loggers = new ILogger[]
                 {
-                    new ConsoleLogger(LoggerVerbosity.Normal)
-                }
+                    new ConsoleLogger(LoggerVerbosity.Detailed)
+                },
             }, buildRequestData);
             switch (j.OverallResult)
             {
