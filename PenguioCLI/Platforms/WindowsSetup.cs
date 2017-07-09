@@ -81,7 +81,6 @@ namespace PenguioCLI.Platforms
 
         public static BuildResult Build(string directory)
         {
-
             if (!Directory.Exists(Path.Combine(directory, "platforms")))
             {
                 throw new Exception("No Platforms");
@@ -128,7 +127,6 @@ namespace PenguioCLI.Platforms
             var xmlFontFiles = fontFiles.Where(a => a.EndsWith(".xml"));
 
             names.AddRange(fontFiles.Where(a => a.EndsWith(".png")));
-
             var contentFile = new List<string>();
             contentFile.Add("/platform:Windows");
             contentFile.Add("/profile:Reach");

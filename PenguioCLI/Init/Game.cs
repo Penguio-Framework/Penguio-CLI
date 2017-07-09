@@ -10,8 +10,6 @@ namespace {{{GameName}}}
     {
         public IScreen landingScreen;
 
-        public GameService GameService { get; set; }
-
         public ILayout LandingAreaLayout { get; set; }
 
         public IScreenManager ScreenManager { get; set; }
@@ -24,13 +22,12 @@ namespace {{{GameName}}}
         {
             ScreenManager = screenManager;
 
-            var screenTransitioner = new ScreenTransitioner(this);
             int width = 1536;
             int height = 2048;
 
             landingScreen = screenManager.CreateScreen();
             LandingAreaLayout = landingScreen.CreateLayout(width, height).MakeActive().SetScreenOrientation(ScreenOrientation.Vertical);
-            LandingAreaLayout.LayoutView = new LandingAreaLayout(this, GameService, renderer, LandingAreaLayout);
+            LandingAreaLayout.LayoutView = new LandingAreaLayout(this, renderer, LandingAreaLayout);
 
             ScreenManager.ChangeScreen(landingScreen);
         }
